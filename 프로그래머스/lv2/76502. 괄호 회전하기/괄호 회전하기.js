@@ -1,4 +1,3 @@
-
 const pair = { "{": "}", "[": "]", "(": ")" };
 
 function solution(s) {
@@ -8,6 +7,7 @@ function solution(s) {
     const stack = [];
     for (let i = 0; i < arr.length; i++) {
       const currentBracket = arr[i];
+      if (arr.length % 2 === 1) return false;
       if (pair[currentBracket])
         // 마주친 괄호가 좌괄호일 경우
         stack.push(currentBracket);
@@ -36,4 +36,3 @@ function solution(s) {
   return result;
 }
 
-console.log(solution("[](){}"));
