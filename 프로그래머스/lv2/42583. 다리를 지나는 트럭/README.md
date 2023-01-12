@@ -4,7 +4,7 @@
 
 ### 성능 요약
 
-메모리: 33.4 MB, 시간: 0.07 ms
+메모리: 33.4 MB, 시간: 0.06 ms
 
 ### 구분
 
@@ -14,50 +14,108 @@
 
 <br/>정확성: 100.0<br/>합계: 100.0 / 100.0
 
-### 로직
-![KakaoTalk_20230112_104037527](https://user-images.githubusercontent.com/121365739/211956053-eefdabda-99c3-4fa7-907a-43e3a94e27f3.jpg)
+### 문제 설명
 
-![KakaoTalk_20230112_104037527_01](https://user-images.githubusercontent.com/121365739/211956069-fd95b9ea-45e2-4aa1-ac94-df8a10672b39.jpg)
+<p>트럭 여러 대가 강을 가로지르는 일차선 다리를 정해진 순으로 건너려 합니다. 모든 트럭이 다리를 건너려면 최소 몇 초가 걸리는지 알아내야 합니다. 다리에는 트럭이 최대 bridge_length대 올라갈 수 있으며, 다리는 weight 이하까지의 무게를 견딜 수 있습니다. 단, 다리에 완전히 오르지 않은 트럭의 무게는 무시합니다.</p>
 
-window를 사용하여 다리에 있는 트럭을 비유하고 window에 있는 값의 합이 weight를 넘어가지 않게 한다. 
+<p>예를 들어, 트럭 2대가 올라갈 수 있고 무게를 10kg까지 견디는 다리가 있습니다. 무게가 [7, 4, 5, 6]kg인 트럭이 순서대로 최단 시간 안에 다리를 건너려면 다음과 같이 건너야 합니다.</p>
+<table class="table">
+        <thead><tr>
+<th>경과 시간</th>
+<th>다리를 지난 트럭</th>
+<th>다리를 건너는 트럭</th>
+<th>대기 트럭</th>
+</tr>
+</thead>
+        <tbody><tr>
+<td>0</td>
+<td>[]</td>
+<td>[]</td>
+<td>[7,4,5,6]</td>
+</tr>
+<tr>
+<td>1~2</td>
+<td>[]</td>
+<td>[7]</td>
+<td>[4,5,6]</td>
+</tr>
+<tr>
+<td>3</td>
+<td>[7]</td>
+<td>[4]</td>
+<td>[5,6]</td>
+</tr>
+<tr>
+<td>4</td>
+<td>[7]</td>
+<td>[4,5]</td>
+<td>[6]</td>
+</tr>
+<tr>
+<td>5</td>
+<td>[7,4]</td>
+<td>[5]</td>
+<td>[6]</td>
+</tr>
+<tr>
+<td>6~7</td>
+<td>[7,4,5]</td>
+<td>[6]</td>
+<td>[]</td>
+</tr>
+<tr>
+<td>8</td>
+<td>[7,4,5,6]</td>
+<td>[]</td>
+<td>[]</td>
+</tr>
+</tbody>
+      </table>
+<p>따라서, 모든 트럭이 다리를 지나려면 최소 8초가 걸립니다.</p>
 
-다음 트럭을 window(다리)에 옮기기 전에 다리 위에 있는 트럭의 무게를 합산한 값이 문제에서 주어진 weights를 넘어간다면 
-다음 트럭이 올라올 수 없으므로 트럭 대신 0을 window에 추가한다. 
+<p>solution 함수의 매개변수로 다리에 올라갈 수 있는 트럭 수 bridge_length, 다리가 견딜 수 있는 무게 weight, 트럭 별 무게 truck_weights가 주어집니다. 이때 모든 트럭이 다리를 건너려면 최소 몇 초가 걸리는지 return 하도록 solution 함수를 완성하세요.</p>
 
-truck 리스트가 비었을 모든 트럭이 다리 위로 넘어간 것이다. 하지만 아직 window(다리)에 트럭이 남았기 때문에
-answer(건넌 트럭)+window(아직 건너고 있는 트럭)의 길이를 더하면 된다.
+<h5>제한 조건</h5>
 
-### 풀이
-```javascript
-function solution(bridge_length, weight, truck_weights) {
-  let truck = truck_weights.slice(); // 배열 얕은 복사
-  // truck = [7,4,5,6]
-  let window = Array(bridge_length).fill(0); //
-  // [0,0] 트럭 한 대가 다리를 다 지나기 위해서는 다리의 길이만큼의 초가 필요하기 때문에
-  // 0은 아직 아무 트럭도 올라와 있지 않은 상태
-  let answer = 0;
+<ul>
+<li>bridge_length는 1 이상 10,000 이하입니다.</li>
+<li>weight는 1 이상 10,000 이하입니다.</li>
+<li>truck_weights의 길이는 1 이상 10,000 이하입니다.</li>
+<li>모든 트럭의 무게는 1 이상 weight 이하입니다.</li>
+</ul>
 
-  while (truck.length > 0) {
-    // 대기 중인 모든 트럭이 다 나가서 다리 위에 올려질 때까지
-    window.shift();
-    // 1초가 지났으므로 다리의 맨 앞에 있던 트럭이 완전히 건너감
-    let display = window.reduce((acc, w) => acc + w, 0) + truck[0];
-    // 다리 앞에 전광판이 있다고 생각함. 이 전광판은 다음 트럭이 올라타도 되는지를 체크해줌
-    if (display <= weight) {
-      // window(다리 위 트럭 중량)의 누적합 + 대기열에서의 가장 맨 앞의 트럭의 무게가 weight을 초과하지 않는다면
-      window.push(truck.shift());
-      // 다리(window.push) 위에 올려도 제한하중을 견딜 수 있으니까 대기열에서 다음 트럭(truck.shift)을 올린다
-    } else {
-      window.push(0);
-      // 트럭의 무게가 제한 하중(weight)을 초과한다면 앞의 트럭이 나갈 때 까지 기다려야 하므로 트럭 대신 0을 다리 위에 추가한다
-      (다리 길이1 만큼 앞으로 밀린다. 즉, 다리 위의 전체 트럭이 1초만큼 이동한다)
-    }
-    answer++;
-    // 이렇게 1초가 지났음
-  }
+<h5>입출력 예</h5>
+<table class="table">
+        <thead><tr>
+<th>bridge_length</th>
+<th>weight</th>
+<th>truck_weights</th>
+<th>return</th>
+</tr>
+</thead>
+        <tbody><tr>
+<td>2</td>
+<td>10</td>
+<td>[7,4,5,6]</td>
+<td>8</td>
+</tr>
+<tr>
+<td>100</td>
+<td>100</td>
+<td>[10]</td>
+<td>101</td>
+</tr>
+<tr>
+<td>100</td>
+<td>100</td>
+<td>[10,10,10,10,10,10,10,10,10,10]</td>
+<td>110</td>
+</tr>
+</tbody>
+      </table>
+<p><a href="http://icpckorea.org/2016/ONLINE/problem.pdf" target="_blank" rel="noopener">출처</a></p>
 
-  return answer + window.length;
-}
-console.log(solution(2, 10, [7, 4, 5, 6]));
+<p>※ 공지 - 2020년 4월 06일 테스트케이스가 추가되었습니다.</p>
 
-```
+
+> 출처: 프로그래머스 코딩 테스트 연습, https://programmers.co.kr/learn/challenges
